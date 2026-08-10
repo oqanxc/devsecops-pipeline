@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# ⚠️ RISK 1: Hardcoded Secret Key (Secret Scanning yakalayacak)
+
 SECRET_KEY = "super_secret_api_key_123456789"
 DATABASE = "test.db"
 
@@ -11,22 +11,22 @@ def init_db():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     cursor.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT, password TEXT)")
-    cursor.execute("INSERT OR IGNORE INTO users VALUES (1, 'admin', 'AdminPassword123!')")
+    cursor.execute("INSERT OR IGNORE INTO users VALUES (1, 'admin', 'Admin123')")
     conn.commit()
     conn.close()
 
 @app.route("/")
 def home():
-    return jsonify({"status": "running", "service": "DevSecOps Demo API"})
+    return jsonify({"status": "running", "service": "Devcsecops Demo"})
 
-# ⚠️ RISK 2: SQL Injection (SAST / Bandit yakalayacak)
+# (SAST / Bandit yakalayacak umarım:))
 @app.route("/user", methods=["GET"])
 def get_user():
     username = request.args.get("username", "")
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     
-    # Zafiyetli Sorgu: Parametrik sorgu (?) kullanılmadı!
+    # SQLi?
     query = f"SELECT id, username FROM users WHERE username = '{username}'"
     print(f"[LOG] Executing Query: {query}")
     
