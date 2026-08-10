@@ -1,0 +1,41 @@
+name: DevSecOps Security Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  sast_and_secret_scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit
+
+      # 1. TARAMA: SAST (Bandit)
+      - name: Run Bandit (SAST Scan)
+        run: |
+          echo "=== Running Bandit SAST Scanner ==="
+          bandit -r . -f txt || true
+
+      # 2. TARAMA: Secret Scanning (Trufflehog)
+      - name: Secret Scanning (Trufflehog)
+        uses: trufflesecurity/trufflehog-actions-scan@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+        continue-on-error: true
