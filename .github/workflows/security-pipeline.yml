@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+  security-events: write # SARIF raporlarını GitHub Security tabına yazma izni
+
+
 jobs:
   security_scans:
     name: Security Scanning Pipeline
@@ -29,7 +34,13 @@ jobs:
       - name: Run Bandit (SAST Scan)
         run: |
           echo "=== Running Bandit SAST Scanner ==="
-          bandit -r .
+          bandit -r . -f sarif -o bandit-results.sarif || true
+      - name: Upload Bandit SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'bandit-results.sarif'
+          category: 'bandit-sast'
 
       # #Secret Scanning (Trufflehog)
       - name: Secret Scanning (Trufflehog)
@@ -47,11 +58,19 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'devsecops-demo-app:latest'
-          format: 'table'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
           exit-code: '0'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+          
+      - name: Upload Trivy SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+          category: 'trivy-container'
 
       #  Deploy the application in a container for DAST
       - name: Run Container for DAST
