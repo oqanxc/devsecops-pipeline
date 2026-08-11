@@ -25,24 +25,24 @@ jobs:
           python -m pip install --upgrade pip
           pip install bandit
 
-      # 1. TARAMA: SAST (Bandit)
+      #  SAST (Bandit)
       - name: Run Bandit (SAST Scan)
         run: |
           echo "=== Running Bandit SAST Scanner ==="
           bandit -r .
 
-      # 2. TARAMA: Secret Scanning (Trufflehog)
+      # #Secret Scanning (Trufflehog)
       - name: Secret Scanning (Trufflehog)
         uses: trufflesecurity/trufflehog@main
         with:
           extra_args: --debug --only-verified
 
-      # 3. ADIM: Docker İmajını Derle
+      #  Compile Docker Image
       - name: Build Docker Image
         run: |
           docker build -t devsecops-demo-app:latest .
 
-      # 4. TARAMA: Container Security (Trivy)
+      #  Container Security (Trivy)
       - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@master
         with:
@@ -53,19 +53,19 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
-      # 5. ADIM: DAST İçin Uygulamayı Konteyner Olarak Kaldır
+      #  DAST İçin Uygulamayı Konteyner Olarak Kaldır
       - name: Run Container for DAST
         run: |
           docker run -d --name test-app -p 5000:5000 devsecops-demo-app:latest
-          sleep 5  # Uygulamanın tam başlatılması için bekleme
-
-      # 6. TARAMA: DAST (OWASP ZAP Baseline Scan)
+          sleep 5  # wait for the container to start
+      #  DAST (OWASP ZAP Baseline Scan)
       - name: OWASP ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           docker_name: 'ghcr.io/zaproxy/zaproxy:stable'
           target: 'http://localhost:5000/'
+          artifact_name: 'zap-report'
           rules_file_name: '.zap/rules.tsv'
           allow_issue_writing: false
           fail_action: false
