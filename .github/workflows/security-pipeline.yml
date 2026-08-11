@@ -61,13 +61,15 @@ jobs:
       #  DAST (OWASP ZAP Baseline Scan)
       - name: OWASP ZAP Baseline Scan
         run: |
-          docker run --net=host -v $GITHUB_WORKSPACE:/zap/wrk/:rw ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+          mkdir -p zap_out
+          chmod 777 zap_out
+          docker run --net=host -v $(pwd)/zap_out:/zap/wrk/:rw ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
             -t http://localhost:5000/ \
             -r zap_report.html \
             -J zap_report.json || true
           
-          # Dosyaların oluşup oluşmadığını terminale yazdır
-          ls -la zap_report.*
+    
+          cp zap_out/zap_report.* . || true
 
       - name: Upload ZAP Report
         uses: actions/upload-artifact@v4
