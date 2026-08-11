@@ -7,8 +7,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  sast_and_secret_scan:
-    name: Security Scanning
+  security_scans:
+    name: Security Scanning Pipeline
     runs-on: ubuntu-latest
 
     steps:
@@ -25,15 +25,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install bandit
 
-      # 1. TARAMA: SAST (Bandit)
+      # 1. SAST (Bandit)
       - name: Run Bandit (SAST Scan)
         run: |
           echo "=== Running Bandit SAST Scanner ==="
-          bandit -r . -f txt || true
+          bandit -r .
 
-      # 2. TARAMA: Secret Scanning (Trufflehog)
+      # 2. Secret Scanning (Trufflehog)
       - name: Secret Scanning (Trufflehog)
         uses: trufflesecurity/trufflehog@main
         with:
           extra_args: --debug --only-verified
-        continue-on-error: true
+
+      # 3. Compile Docker image  (Build)
+      - name: Build Docker Image
+        run: |
+          docker build -t devsecops-demo-app:latest .
+
+      # 4. Dependency Scanning (Trivy)
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'devsecops-demo-app:latest'
+          format: 'table'
+          exit-code: '0' # Şimdilik raporu görmek için 0 kalsın, kritik bulguda fail etmek istersek '1' yaparız.
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
