@@ -1,37 +1,37 @@
+import os
 import sqlite3
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
 
-SECRET_KEY = "super_secret_api_key_123456789"
+SECRET_KEY = os.getenv("SECRET_KEY", "default_safe_dev_key")
 DATABASE = "test.db"
 
 def init_db():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     cursor.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT, password TEXT)")
-    cursor.execute("INSERT OR IGNORE INTO users VALUES (1, 'admin', 'Admin123')")
+    cursor.execute("INSERT OR IGNORE INTO users VALUES (1, 'admin', 'AdminPassword123!')")
     conn.commit()
     conn.close()
 
 @app.route("/")
 def home():
-    return jsonify({"status": "running", "service": "Devcsecops Demo"})
+    return jsonify({"status": "running", "service": "DevSecOps Demo API"})
 
-# (SAST / Bandit yakalayacak umarım:))
+# (B608): SQL Injection remediated.
 @app.route("/user", methods=["GET"])
 def get_user():
     username = request.args.get("username", "")
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     
-    # SQLi?
-    query = f"SELECT id, username FROM users WHERE username = '{username}'"
-    print(f"[LOG] Executing Query: {query}")
+   
+    query = "SELECT id, username FROM users WHERE username = ?"
     
     try:
-        cursor.execute(query)
+        cursor.execute(query, (username,))
         user = cursor.fetchone()
         conn.close()
         if user:
@@ -42,4 +42,5 @@ def get_user():
 
 if __name__ == "__main__":
     init_db()
-    app.run(host="0.0.0.0", port=5000) # nosec B104
+    #  0.0.0.0 listening for Docker container compatilibity.
+    app.run(host="0.0.0.0", port=5000)  # nosec B104
