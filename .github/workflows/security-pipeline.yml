@@ -33,7 +33,7 @@ jobs:
       - name: Run Bandit (SAST Scan)
         run: |
           echo "=== Running Bandit SAST Scanner ==="
-          bandit -r . -f sarif -o bandit-results.sarif || true
+          bandit -r . -f sarif -o bandit-results.sarif 
       - name: Upload Bandit SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         if: always()
