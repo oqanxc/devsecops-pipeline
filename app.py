@@ -4,6 +4,8 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
+from crlf_injection import crlf_bp
+app.register_blueprint(crlf_bp)
 
 SECRET_KEY = os.getenv("SECRET_KEY", "default_safe_dev_key")
 DATABASE = "test.db"
