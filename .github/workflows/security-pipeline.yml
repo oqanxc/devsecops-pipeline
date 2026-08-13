@@ -101,5 +101,5 @@ jobs:
       - name: Stop and Remove Container
         if: always()
         run: |
-          docker stop test-app
-          docker rm test-app
+          docker stop test-app || true
+          docker rm test-app   || true
