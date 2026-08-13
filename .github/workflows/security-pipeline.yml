@@ -78,16 +78,15 @@ jobs:
           docker run -d --name test-app -p 5000:5000 devsecops-demo-app:latest
           sleep 5
       #  DAST (OWASP ZAP Baseline Scan)
-      - name: OWASP ZAP Baseline Scan
+      - name: OWASP ZAP Full Scan
         run: |
           mkdir -p zap_out
           chmod 777 zap_out
-          docker run --net=host -v $(pwd)/zap_out:/zap/wrk/:rw ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
-            -t http://localhost:5000/ \
+          docker run --net=host -v $(pwd)/zap_out:/zap/wrk/:rw ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
+            -t "http://localhost:5000/go?url=test" \
             -r zap_report.html \
             -J zap_report.json || true
-          
-    
+
           cp zap_out/zap_report.* . || true
 
       - name: Upload ZAP Report
