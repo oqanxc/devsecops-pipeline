@@ -15,6 +15,9 @@ COPY . .
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
+RUN find / -type f \( -name "*.sbom" -o -name "*.spdx" -o -name "*.cdx" \) 2>/dev/null
+
+
 EXPOSE 5000
 
 CMD ["python", "app.py"]
