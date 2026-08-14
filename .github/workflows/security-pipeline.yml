@@ -69,6 +69,13 @@ jobs:
           vuln-type: 'os,library'
           severity: 'HIGH,CRITICAL'
           scanners: 'vuln'
+      - name: Debug Trivy SARIF
+        if: always()
+        run: |
+          echo "=== msgpack ==="
+          grep -i -A 15 -B 5 "msgpack" trivy-results.sarif || true
+          echo "=== setuptools ==="
+          grep -i -A 15 -B 5 "setuptools" trivy-results.sarif || true
           
       - name: Debug - Trivy Human Readable Output
         if: always()
