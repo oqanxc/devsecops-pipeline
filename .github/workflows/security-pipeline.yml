@@ -59,7 +59,7 @@ jobs:
 
       #  Container Security (Trivy)
       - name: Run Trivy Vulnerability Scanner
-        uses: aquasecurity/trivy-action@v0.33.1
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'devsecops-demo-app:latest'
           format: 'sarif'
@@ -71,7 +71,7 @@ jobs:
           
       - name: Debug - Trivy Human Readable Output
         if: always()
-        uses: aquasecurity/trivy-action@v0.33.1
+        uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'devsecops-demo-app:latest'
           format: 'table'
