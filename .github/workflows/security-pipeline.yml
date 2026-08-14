@@ -53,6 +53,10 @@ jobs:
         run: |
             docker build --no-cache -t devsecops-demo-app:latest .
 
+      - name: Check installed Python packages
+        run: |
+            docker run --rm devsecops-demo-app:latest python -c "import msgpack, setuptools; print('msgpack:', msgpack.__version__); print('setuptools:', setuptools.__version__)"
+
       #  Container Security (Trivy)
       - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@master
