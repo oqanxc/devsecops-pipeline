@@ -51,7 +51,7 @@ jobs:
       #  Compile Docker Image
       - name: Build Docker Image
         run: |
-          docker build -t devsecops-demo-app:latest .
+            docker build --no-cache -t devsecops-demo-app:latest .
 
       #  Container Security (Trivy)
       - name: Run Trivy Vulnerability Scanner
