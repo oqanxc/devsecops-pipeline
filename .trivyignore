@@ -1,3 +1,9 @@
+# GHSA-6v7p-g79w-8964: this flags pip's internal vendored msgpack copy
+# (pip/_vendor/msgpack), not the actual msgpack package used by the app.
+# The application's own msgpack dependency is pinned to >=1.2.1 in
+# requirements.txt and verified via runtime check.
+GHSA-6v7p-g79w-8964
+
 # CVE-2025-47273: this flags a leftover/system-level setuptools copy
 # from the base image (python:3.11-slim-bookworm), not the actual
 # setuptools used by the app. Verified via runtime check that the
