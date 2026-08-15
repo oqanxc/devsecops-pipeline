@@ -51,7 +51,12 @@ jobs:
       #  Compile Docker Image
       - name: Build Docker Image
         run: |
-          docker build -t devsecops-demo-app:latest .
+            docker build --no-cache -t devsecops-demo-app:latest .
+
+      - name: Check installed Python packages
+        run: |
+            docker run --rm devsecops-demo-app:latest python -c "import msgpack, setuptools; print('msgpack:', msgpack.__version__); print('setuptools:', setuptools.__version__)"
+      
 
       #  Container Security (Trivy)
       - name: Run Trivy Vulnerability Scanner
@@ -60,10 +65,33 @@ jobs:
           image-ref: 'devsecops-demo-app:latest'
           format: 'sarif'
           output: 'trivy-results.sarif'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'HIGH,CRITICAL'
+          trivyignores: '.trivyignore'
+        env:
+          TRIVY_NO_CACHE: 'true'
+          #scanners: 'vuln'
+      - name: Debug Trivy SARIF
+        if: always()
+        run: |
+          echo "=== msgpack ==="
+          grep -i -A 15 -B 5 "msgpack" trivy-results.sarif || true
+          echo "=== setuptools ==="
+          grep -i -A 15 -B 5 "setuptools" trivy-results.sarif || true
+          
+      - name: Debug - Trivy Human Readable Output
+        if: always()
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'devsecops-demo-app:latest'
+          format: 'table'
           exit-code: '0'
           ignore-unfixed: true
           vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          severity: 'HIGH,CRITICAL'
+          #scanners: 'vuln'
 
       - name: Upload Trivy SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
@@ -101,5 +129,5 @@ jobs:
       - name: Stop and Remove Container
         if: always()
         run: |
-          docker stop test-app
-          docker rm test-app
+          docker stop test-app || true
+          docker rm test-app   || true
