@@ -68,6 +68,8 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'HIGH,CRITICAL'
+        env:
+          TRIVY_NO_CACHE: 'true'
           #scanners: 'vuln'
       - name: Debug Trivy SARIF
         if: always()
