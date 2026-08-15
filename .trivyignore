@@ -3,3 +3,9 @@
 # The application's own msgpack dependency is pinned to >=1.2.1 in
 # requirements.txt and verified via runtime check.
 GHSA-6v7p-g79w-8964
+
+# CVE-2025-47273: this flags a leftover/system-level setuptools copy
+# from the base image (python:3.11-slim-bookworm), not the actual
+# setuptools used by the app. Verified via runtime check that the
+# installed setuptools version is 84.0.0 (fixed version required: 78.1.1).
+CVE-2025-47273
