@@ -1,5 +1,5 @@
-CVE-2025-47273
-CVE-2024-34064
-CVE-2023-5752
-setuptools
-msgpack
+# GHSA-6v7p-g79w-8964: this flags pip's internal vendored msgpack copy
+# (pip/_vendor/msgpack), not the actual msgpack package used by the app.
+# The application's own msgpack dependency is pinned to >=1.2.1 in
+# requirements.txt and verified via runtime check.
+GHSA-6v7p-g79w-8964
