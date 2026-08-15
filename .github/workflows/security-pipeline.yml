@@ -56,6 +56,9 @@ jobs:
       - name: Check installed Python packages
         run: |
             docker run --rm devsecops-demo-app:latest python -c "import msgpack, setuptools; print('msgpack:', msgpack.__version__); print('setuptools:', setuptools.__version__)"
+      - name: Find all msgpack files (duplicate detection)
+        run: |
+            docker run --rm devsecops-demo-app:latest find / -iname "*msgpack*" 2>/dev/null
 
       #  Container Security (Trivy)
       - name: Run Trivy Vulnerability Scanner
