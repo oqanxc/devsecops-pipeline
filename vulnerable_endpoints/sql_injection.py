@@ -31,10 +31,10 @@ def search():
     cursor = conn.cursor()
 
     # VULNERABLE LINE: raw string concatenation into SQL
-    query = "SELECT id, username FROM users WHERE username = '" + username + "'"
+    query = "SELECT id, username FROM users WHERE username = ?"
 
     try:
-        cursor.execute(query)
+        cursor.execute(query, (username,))
         rows = cursor.fetchall()
         conn.close()
         return jsonify([{"id": r[0], "username": r[1]} for r in rows])
