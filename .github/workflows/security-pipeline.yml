@@ -50,10 +50,12 @@ jobs:
 
       #  Compile Docker Image
       - name: Build Docker Image
+        if: always()
         run: |
             docker build --no-cache -t devsecops-demo-app:latest .
 
       - name: Check installed Python packages
+        if: always()
         run: |
             docker run --rm devsecops-demo-app:latest python -c "import msgpack, setuptools; print('msgpack:', msgpack.__version__); print('setuptools:', setuptools.__version__)"
       
