@@ -6,38 +6,45 @@ Intentionally vulnerable route used to test whether the pipeline
 
 """
 import re
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 from flask import Blueprint, Response, redirect, request
 
 crlf_bp = Blueprint("crlf_injection", __name__)
 
-@crlf_bp.route("/go")
-def go():
+ALLOWED_PATHS = {"/", "/dashboard", "/login", "/home"}
+ALLOWED_HOSTS = {"example.com", "my-domain.com"}
 
-    # Input Url parameter
+def go():
     target_url = request.args.get("url", "/")
 
-    # 2. Check CRLF Injection  (\r veya \n)
-    if re.search(r"[\r\n]", target_url):
-        return Response("Invalid redirect target", status=400)
+    # 1. URL Decode & CRLF / Traversal checks
+    decoded_url = unquote(target_url)
+    if re.search(r"[\r\n]", decoded_url):
+        return Response("Invalid redirect target: CRLF detected", status=400)
 
-    # 3. URL Parse ve Domain/Format check
-    from urllib.parse import urlparse
+    # Deny Path traversal chars within input('..' or '.') 
+    if ".." in decoded_url or "/." in decoded_url or "\\." in decoded_url:
+        return Response("Invalid path: Traversal sequence detected", status=400)
+
     try:
-        parsed = urlparse(target_url)
+        parsed = urlparse(decoded_url)
 
-        # Tam domain verilmişse ve whitelist'te değilse engelle
-        if parsed.netloc and parsed.netloc.split(":")[0] not in ALLOWED_HOSTS:
-            return Response("Untrusted redirect target", status=400)
+        #Domain Check (SSRF & Open Redirect block)
+        if parsed.netloc:
+            host = parsed.netloc.split(":")[0]
+            if host not in ALLOWED_HOSTS:
+                return Response("Untrusted redirect host", status=400)
+            return redirect(target_url)
 
-        # Şemasız relative path gelmişse '/' ile başlamasını zorunlu tut
-        if not parsed.netloc and not target_url.startswith("/"):
-            return Response("Invalid relative URL", status=400)
+        # 3. Path Kontrolü (Block random paths apart from Allow-list)
+        path = parsed.path if parsed.path else "/"
+        if path not in ALLOWED_PATHS:
+            return Response("Untrusted redirect path", status=400)
 
     except Exception:
         return Response("Malformed URL", status=400)
 
-    return redirect(target_url)
+    return redirect(path)
     """
     VULNERABLE ENDPOINT.
 
