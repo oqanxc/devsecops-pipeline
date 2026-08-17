@@ -40,6 +40,16 @@ def search():
         return jsonify([{"id": r[0], "username": r[1]} for r in rows])
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+    """query = "SELECT id, username FROM users WHERE username = '" + username + "'"
+
+    try:
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        conn.close()
+        return jsonify([{"id": r[0], "username": r[1]} for r in rows])
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500 """
 
     #  SAFE ALTERNATIVE using placeholder
     # query = "SELECT id, username FROM users WHERE username = ?"
