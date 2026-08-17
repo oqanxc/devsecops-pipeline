@@ -115,7 +115,8 @@ jobs:
           docker run --net=host -v $(pwd)/zap_out:/zap/wrk/:rw ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
             -t "http://localhost:5000/go?url=test" \
             -r zap_report.html \
-            -J zap_report.json || true
+            -J zap_report.json \
+            -I
 
           cp zap_out/zap_report.* . || true
 
