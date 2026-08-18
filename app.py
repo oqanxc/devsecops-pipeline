@@ -7,6 +7,8 @@ from vulnerable_endpoints.sql_injection import sqli_bp
 app.register_blueprint(sqli_bp)
 from vulnerable_endpoints.crlf_injection import crlf_bp
 app.register_blueprint(crlf_bp)
+from vulnerable_endpoints.xss import xss_bp
+app.register_blueprint(xss_bp)
 
 SECRET_KEY = os.getenv("SECRET_KEY", "default_safe_dev_key")
 DATABASE = "test.db"
@@ -21,7 +23,11 @@ def init_db():
 
 @app.route("/")
 def home():
-    return jsonify({"status": "running", "service": "DevSecOps Demo API"})
+    return jsonify({
+        "status": "running",
+        "service": "DevSecOps Demo API",
+        "endpoints": ["/go?url=test", "/search?username=test", "/greet?name=test"]
+    })
 
 # (B608): SQL Injection remediated.
 @app.route("/user", methods=["GET"])
