@@ -112,8 +112,9 @@ jobs:
         run: |
           mkdir -p zap_out
           chmod 777 zap_out
-          docker run --net=host -v $(pwd)/zap_out:/zap/wrk/:rw ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
+          docker run --net=host -v $(pwd):/zap/wrk/:rw ghcr.io/zaproxy/zaproxy:stable zap-api-scan.py \
             -t /zap/wrk/openapi.json \
+            -f openapi \
             -r zap_report.html \
             -J zap_report.json \
             -I
