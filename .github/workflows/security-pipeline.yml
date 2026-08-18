@@ -108,22 +108,22 @@ jobs:
           docker run -d --name test-app -p 5000:5000 devsecops-demo-app:latest
           sleep 5
       #  DAST (OWASP ZAP Baseline Scan)
-      - name: OWASP ZAP API Scan
+      - name: OWASP ZAP Full Scan
         run: |
           mkdir -p zap_out
           chmod 777 zap_out
-          chmod 666 openapi.json || true
+          chmod 666 zap_rules.tsv || true
 
           docker run --net=host \
-            -v $(pwd)/openapi.json:/zap/wrk/openapi.json:ro \
-            -v $(pwd)/zap_out:/zap/wrk/output:rw \
-            ghcr.io/zaproxy/zaproxy:stable zap-api-scan.py \
-            -t /zap/wrk/openapi.json \
-            -f openapi \
-            -r /zap/wrk/output/zap_report.html \
-            -J /zap/wrk/output/zap_report.json \
-            -I
-            cp zap_out/zap_report.* . || true
+            -v $(pwd)/zap_out:/zap/wrk/:rw \
+            -v $(pwd)/zap_rules.tsv:/zap/wrk/zap_rules.tsv:ro \
+            ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
+            -t "http://localhost:5000/" \
+            -c /zap/wrk/zap_rules.tsv \
+            -r zap_report.html \
+            -J zap_report.json
+
+          cp zap_out/zap_report.* . || true
 
       - name: Upload ZAP Report
         uses: actions/upload-artifact@v4
