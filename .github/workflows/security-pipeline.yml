@@ -113,7 +113,7 @@ jobs:
           mkdir -p zap_out
           chmod 777 zap_out
           docker run --net=host -v $(pwd)/zap_out:/zap/wrk/:rw ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
-            -t "http://localhost:5000/go?url=test" \
+            -t /zap/wrk/openapi.json \
             -r zap_report.html \
             -J zap_report.json \
             -I
