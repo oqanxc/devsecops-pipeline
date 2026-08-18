@@ -118,7 +118,7 @@ jobs:
             -v $(pwd)/zap_out:/zap/wrk/:rw \
             -v $(pwd)/zap_rules.tsv:/zap/wrk/zap_rules.tsv:ro \
             ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
-            -t "http://localhost:5000/" \
+            -t "http://localhost:5000/greet?name=test" \
             -c /zap/wrk/zap_rules.tsv \
             -r zap_report.html \
             -J zap_report.json
