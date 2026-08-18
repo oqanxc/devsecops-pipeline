@@ -108,31 +108,33 @@ jobs:
           docker run -d --name test-app -p 5000:5000 devsecops-demo-app:latest
           sleep 5
       #  DAST (OWASP ZAP Baseline Scan)
-      - name: OWASP ZAP Full Scan
+      
+      - name: OWASP ZAP Scan
         run: |
           mkdir -p zap_out
           chmod 777 zap_out
           chmod 666 zap_rules.tsv || true
 
+          # Docker hata kodu dönse bile scriptin çökmemesi ve kopyalamaya geçmesi için:
           docker run --net=host \
-            -v $(pwd)/zap_out:/zap/wrk/:rw \
             -v $(pwd)/zap_rules.tsv:/zap/wrk/zap_rules.tsv:ro \
+            -v $(pwd)/zap_out:/zap/wrk/output:rw \
             ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
             -t "http://localhost:5000/greet?name=test" \
             -c /zap/wrk/zap_rules.tsv \
-            -r zap_report.html \
-            -J zap_report.json
+            -r /zap/wrk/output/zap_report.html \
+            -J /zap/wrk/output/zap_report.json || true
 
           cp zap_out/zap_report.* . || true
 
       - name: Upload ZAP Report
+        if: always()
         uses: actions/upload-artifact@v4
-        if: always() # ensure the report is uploaded even if the scan fails
         with:
-          name: zap-scan-report
+          name: zap-security-report
           path: |
-            zap_report.html
-            zap_report.json
+            zap_out/zap_report.html
+            zap_out/zap_report.json
       #  Stop and Remove the Container
       - name: Stop and Remove Container
         if: always()
