@@ -46,7 +46,7 @@ jobs:
       - name: Secret Scanning (Trufflehog)
         uses: trufflesecurity/trufflehog@main
         with:
-          extra_args: --debug
+          extra_args: --debug --fail
 
       #  Compile Docker Image
       - name: Build Docker Image
