@@ -6,3 +6,4 @@
 10063	IGNORE	(Permissions Policy Header Not Set)
 90004	IGNORE	(Cross-Origin-Resource-Policy Header Missing)
 40012	FAIL	(Cross Site Scripting - Reflected)
+43	IGNORE	(Source Code Disclosure - File Inclusion)
