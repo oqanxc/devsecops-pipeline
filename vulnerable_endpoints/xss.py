@@ -4,9 +4,12 @@ xss.py
 Deliberately vulnerable route used to verify that OWASP ZAP (DAST) catches
 classic Reflected XSS via unescaped user input in HTML output.
 
+
+Remediation: Use the 'markupsafe' library to escape user input before rendering it in HTML.
 """
 
 from flask import Blueprint, request
+from markupsafe import escape
 
 xss_bp = Blueprint("xss", __name__)
 
@@ -23,9 +26,8 @@ def greet():
     """
     name = request.args.get("name", "friend")
 
-    # --- VULNERABLE LINE: unescaped user input rendered as raw HTML ---
-    return f"<html><body><h1>Hello, {name}!</h1></body></html>"
-
+    safe_name = escape(name)
+    return f"<html><body><h1>Hello, {safe_name}!</h1></body></html>"
     # SAFE ALTERNATIVE (for comparison) 
     # from markupsafe import escape
     # return f"<html><body><h1>Hello, {escape(name)}!</h1></body></html>"
