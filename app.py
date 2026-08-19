@@ -55,6 +55,9 @@ if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)  # nosec B104
 
 
+# TEST SECRET - PIPELINE TRUFFLEHOG GATE VERIFICATION
+GENERIC_API_KEY = "sk_live_1234567890abcdef1234567890abcdef12345678"
+
 
 
 
