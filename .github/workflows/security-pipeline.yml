@@ -8,14 +8,14 @@ on:
 
 permissions:
   contents: read
-  security-events: write # SARIF raporlarını GitHub Security tabına yazma izni
-
+  security-events: write
 
 jobs:
-  security_scans:
-    name: Security Scanning Pipeline
-    runs-on: ubuntu-latest
 
+
+  sast_scan:
+    name: SAST (Bandit)
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -29,7 +29,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install bandit bandit-sarif-formatter
-          
+
       - name: Run Bandit (SAST Scan)
         run: |
           echo "=== Running Bandit SAST Scanner ==="
@@ -42,25 +42,34 @@ jobs:
           sarif_file: 'bandit-results.sarif'
           category: 'bandit-sast'
 
-      # #Secret Scanning (Trufflehog)
+  secret_scan:
+    name: Secrets (Trufflehog)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Secret Scanning (Trufflehog)
         uses: trufflesecurity/trufflehog@main
         with:
           extra_args: --debug
 
-      #  Compile Docker Image
+ 
+  sca_scan:
+    name: SCA (Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Build Docker Image
-        if: always()
         run: |
-            docker build --no-cache -t devsecops-demo-app:latest .
+          docker build --no-cache -t devsecops-demo-app:latest .
 
       - name: Check installed Python packages
-        if: always()
         run: |
-            docker run --rm devsecops-demo-app:latest python -c "import msgpack, setuptools; print('msgpack:', msgpack.__version__); print('setuptools:', setuptools.__version__)"
-      
+          docker run --rm devsecops-demo-app:latest python -c "import msgpack, setuptools; print('msgpack:', msgpack.__version__); print('setuptools:', setuptools.__version__)"
 
-      #  Container Security (Trivy)
       - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@master
         with:
@@ -74,15 +83,7 @@ jobs:
           trivyignores: '.trivyignore'
         env:
           TRIVY_NO_CACHE: 'true'
-          #scanners: 'vuln'
-      - name: Debug Trivy SARIF
-        if: always()
-        run: |
-          echo "=== msgpack ==="
-          grep -i -A 15 -B 5 "msgpack" trivy-results.sarif || true
-          echo "=== setuptools ==="
-          grep -i -A 15 -B 5 "setuptools" trivy-results.sarif || true
-          
+
       - name: Debug - Trivy Human Readable Output
         if: always()
         uses: aquasecurity/trivy-action@master
@@ -93,7 +94,6 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'HIGH,CRITICAL'
-          #scanners: 'vuln'
 
       - name: Upload Trivy SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
@@ -102,19 +102,30 @@ jobs:
           sarif_file: 'trivy-results.sarif'
           category: 'trivy-container'
 
-      #  Deploy the application in a container for DAST
+ 
+  dast_scan:
+    name: DAST (ZAP)
+    runs-on: ubuntu-latest
+    needs: sca_scan
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: |
+          docker build --no-cache -t devsecops-demo-app:latest .
+
       - name: Run Container for DAST
         run: |
           docker run -d --name test-app -p 5000:5000 devsecops-demo-app:latest
           sleep 5
-      #  DAST (OWASP ZAP  Scan)
+
       - name: OWASP ZAP Scan
         run: |
           mkdir -p zap_out
           chmod 777 zap_out
           chmod 666 zap_rules.tsv || true
 
-          
           docker run --net=host \
             -v $(pwd)/zap_rules.tsv:/zap/wrk/zap_rules.tsv:ro \
             -v $(pwd)/zap_out:/zap/wrk/:rw \
@@ -132,11 +143,9 @@ jobs:
           path: |
             zap_out/zap_report.html
             zap_out/zap_report.json
-      #  Stop and Remove the Container
+
       - name: Stop and Remove Container
         if: always()
         run: |
           docker stop test-app || true
           docker rm test-app   || true
-
-          
