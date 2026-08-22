@@ -1,6 +1,6 @@
 
 const express = require('express'); // Import the Express framework
-const { exec } = require('child_process'); // Import the exec function from the child_process module to execute shell commands
+const { execFile } = require('child_process'); // Used execFile instead of exec to mitigate command injection risks
 const router = express.Router(); // Create an instance of the Express application
 
 function returnInput(input) { // A function that takes user input and returns it without any sanitization or validation
@@ -19,7 +19,7 @@ router.get('/ping', (req, res) => {
     let processedHost = returnInput(targetHost); // The user input is passed to the returnInput function, which returns it without any sanitization or validation
 
     // 2. SINK: The processed input is directly used in a command execution without proper sanitization, leading to potential command injection
-    exec(`ping -c 1 ${processedHost}`, (error, stdout, stderr) => {
+    execFile('ping', ['-c', '1', processedHost], (error, stdout, stderr) => {
         if (error) {
             return res.status(500).send(`Error: ${error.message}`);
         }
