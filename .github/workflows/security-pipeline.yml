@@ -173,7 +173,8 @@ jobs:
             -t "http://localhost:5000/greet?name=test" \
             -c zap_rules.tsv \
             -r zap_report_flask.html \
-            -J zap_report_flask.json || echo "FLASK_FAILED=true" >> $GITHUB_ENV
+            -J zap_report_flask.json \
+            -I ||  echo "FLASK_FAILED=true" >> $GITHUB_ENV
 
       # ZAP Even if Vulnerability Found: Node.js App (Flask'ta zafiyet olsa bile çalışır)
       - name: OWASP ZAP Scan - Node.js App
@@ -185,7 +186,8 @@ jobs:
             -t "http://localhost:3000/os-cmd/ping?host=127.0.0.1" \
             -c zap_rules.tsv \
             -r zap_report_node.html \
-            -J zap_report_node.json || echo "NODE_FAILED=true" >> $GITHUB_ENV
+            -J zap_report_node.json \
+            -I || echo "NODE_FAILED=true" >> $GITHUB_ENV
 
       # Upload ZAP Reports as Artifacts
       - name: Upload All ZAP Reports
