@@ -129,48 +129,79 @@ jobs:
           sarif_file: 'trivy-results.sarif'
           category: 'trivy-container'
 
- 
   dast_scan:
-    name: DAST (ZAP)
+    name: DAST (OWASP ZAP - Multi-Target)
     runs-on: ubuntu-latest
     needs: sca_scan
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Build Docker Image
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build & Run Flask App
         run: |
           docker build --no-cache -t devsecops-demo-app:latest .
-
-      - name: Run Container for DAST
-        run: |
-          docker run -d --name test-app -p 5000:5000 devsecops-demo-app:latest
+          docker run -d --name test-flask-app -p 5000:5000 devsecops-demo-app:latest
           sleep 5
 
-      - name: OWASP ZAP Scan
+      - name: Install & Run Node.js App
+        run: |
+          npm install express
+          node app.js &
+          sleep 5
+          # Check if both apps are running
+          curl -I "http://localhost:5000/greet?name=test"
+          curl -I "http://localhost:3000/os-cmd/ping?host=127.0.0.1"
+
+      - name: Prepare ZAP Output Dir
         run: |
           mkdir -p zap_out
           chmod 777 zap_out
           chmod 666 zap_rules.tsv || true
 
+      # ZAP Even if Vulnerability Found: Flask App (Node.js scan will run regardless of Flask scan result)
+      - name: OWASP ZAP Scan - Flask App
+        run: |
           docker run --net=host \
             -v $(pwd)/zap_rules.tsv:/zap/wrk/zap_rules.tsv:ro \
             -v $(pwd)/zap_out:/zap/wrk/:rw \
             ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
             -t "http://localhost:5000/greet?name=test" \
             -c zap_rules.tsv \
-            -r zap_report.html \
-            -J zap_report.json
+            -r zap_report_flask.html \
+            -J zap_report_flask.json || echo "FLASK_FAILED=true" >> $GITHUB_ENV
 
-      - name: Upload ZAP Report
+      # ZAP Even if Vulnerability Found: Node.js App (Flask'ta zafiyet olsa bile çalışır)
+      - name: OWASP ZAP Scan - Node.js App
+        run: |
+          docker run --net=host \
+            -v $(pwd)/zap_rules.tsv:/zap/wrk/zap_rules.tsv:ro \
+            -v $(pwd)/zap_out:/zap/wrk/:rw \
+            ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
+            -t "http://localhost:3000/os-cmd/ping?host=127.0.0.1" \
+            -c zap_rules.tsv \
+            -r zap_report_node.html \
+            -J zap_report_node.json || echo "NODE_FAILED=true" >> $GITHUB_ENV
+
+      # Upload ZAP Reports as Artifacts
+      - name: Upload All ZAP Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: zap-security-report
-          path: |
-            zap_out/zap_report.html
-            zap_out/zap_report.json
+          name: zap-multi-app-reports
+          path: zap_out/
 
+      # Last check for vulnerabilities and fail the job if any are found
+      - name: Evaluate DAST Security Gate
+        run: |
+          if [ "$FLASK_FAILED" = "true" ] || [ "$NODE_FAILED" = "true" ]; then
+            echo "::error:: Security vulnerabilities detected in DAST scan. Failing the job."
+            exit 1
+          fi
       - name: Stop and Remove Container
         if: always()
         run: |
