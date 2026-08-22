@@ -41,6 +41,7 @@ jobs:
         with:
           sarif_file: 'bandit-results.sarif'
           category: 'bandit-sast'
+
   sast_codeql:
     name: SAST (CodeQL)
     runs-on: ubuntu-latest
@@ -51,7 +52,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'python' ]
+        language: [ 'python','javascript-typescript' ]
 
     steps:
       - name: Checkout Code
