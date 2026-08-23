@@ -9,7 +9,7 @@ const osCommandRouter = require('./vulnerable_endpoints/os_command_injection');
 app.use('/os-cmd', osCommandRouter);
 
 app.get('/', (req, res) => {
-    res.send('Vulnerable Node.js is alive');
+    res.send('Vulnerable Node.js is running');
 });
 
 app.listen(PORT, () => {
