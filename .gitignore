@@ -4,4 +4,3 @@ __pycache__/
 .DS_Store
 security-pipelinecopy.yml
 node_modules/
-node_modules/
