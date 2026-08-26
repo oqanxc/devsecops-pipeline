@@ -108,6 +108,11 @@ jobs:
         run: |
           docker run --rm devsecops-demo-app:latest python -c "import msgpack, setuptools; print('msgpack:', msgpack.__version__); print('setuptools:', setuptools.__version__)"
 
+      - name: Docker push to GitHub Container Registry
+        run: |
+          docker tag devsecops-demo-app:latest ghcr.io/${{ github.repository_owner }}/devsecops-demo-app:latest
+          docker push ghcr.io/${{ github.repository_owner }}/devsecops-demo-app:latest
+
       - name: Run Trivy Vulnerability Scanner
         uses: aquasecurity/trivy-action@master
         with:
