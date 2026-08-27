@@ -28,6 +28,7 @@ spec:
             - containerPort: 5000 # define the port on which the application is running in the container, which will receive traffic from the service
           securityContext: 
             allowPrivilegeEscalation: false # define whether the container should be allowed to escalate privileges, which is set to false in this case to enhance security
+            readOnlyRootFilesystem: true
             capabilities: # define the capabilities for the container, which are Linux kernel features that can be enabled or disabled for the container
               drop:
                 - ALL # define the capabilities to be dropped from the container, which is set to drop all capabilities in this case to enhance security
