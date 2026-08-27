@@ -19,6 +19,7 @@ spec:
       securityContext: # define the security context for the pods created by the deployment, which provides security settings for the pods
         runAsNonRoot: true # define whether the pods should run as a non-root user, which is set to true in this case to enhance security
         runAsUser: 10001 #define the user ID to be used by the pods created by the deployment, which is set to 10001 in this case to enhance security
+        readOnlyRootFilesystem: true # define whether the root filesystem of the pods should be read-only, which is set to true in this case to enhance security
         runAsGroup: 10001
       containers:
         - name: demo-app # define the name of the container to be created by the deployment, which runs the application
