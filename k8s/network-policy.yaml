@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1 # define the api version of the resource
+kind: NetworkPolicy # define the kind of resource, in this case a NetworkPolicy
+metadata: 
+  name: devsecops-demo-netpol # define the name of the network policy to control traffic to and from the application
+  namespace: default # define the namespace in which the network policy will be created
+  labels: 
+    app.kubernetes.io/name: devsecops-demo-app # define the name of the application associated with the network policy
+spec:
+  podSelector: # define the selector for the pods to which the network policy applies
+    matchLabels:
+      app: devsecops-demo-app # define the label selector for the pods created by the deployment, which will be affected by the network policy
+  policyTypes: # define the types of traffic that the network policy will control
+    - Ingress 
+    - Egress 
+  ingress: # define the ingress rules for the network policy, which control incoming traffic to the pods
+    - from:
+        - podSelector: {} # define an empty pod selector to allow traffic from any pod in the same namespace
+      ports: # define the ports for the ingress rules, which control the traffic allowed to the pods
+        - protocol: TCP
+          port: 5000
+  egress: # define the egress rules for the network policy, which control outgoing traffic from the pods
+    - to:
+        - namespaceSelector: # define the namespace selector for the egress rules, which controls the traffic allowed to leave the pods
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system # define the label selector for the namespace, which matches the label of the kube-system namespace
+          podSelector: # define the pod selector for the egress rules, which controls the traffic allowed to leave the pods
+            matchLabels:
+              k8s-app: kube-dns 
+      ports: # define the ports for the egress rules, which control the traffic allowed to leave the pods
+        - protocol: UDP # define the protocol for the port, which is UDP in this case
+          port: 53 
+        - protocol: TCP
+          port: 53
