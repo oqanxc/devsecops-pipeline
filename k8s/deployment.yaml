@@ -19,7 +19,6 @@ spec:
       securityContext: # define the security context for the pods created by the deployment, which provides security settings for the pods
         runAsNonRoot: true # define whether the pods should run as a non-root user, which is set to true in this case to enhance security
         runAsUser: 10001 #define the user ID to be used by the pods created by the deployment, which is set to 10001 in this case to enhance security
-        readOnlyRootFilesystem: true # define whether the root filesystem of the pods should be read-only, which is set to true in this case to enhance security
         runAsGroup: 10001
       containers:
         - name: demo-app # define the name of the container to be created by the deployment, which runs the application
@@ -29,6 +28,7 @@ spec:
             - containerPort: 5000 # define the port on which the application is running in the container, which will receive traffic from the service
           securityContext: 
             allowPrivilegeEscalation: false # define whether the container should be allowed to escalate privileges, which is set to false in this case to enhance security
+            readOnlyRootFilesystem: true
             capabilities: # define the capabilities for the container, which are Linux kernel features that can be enabled or disabled for the container
               drop:
                 - ALL # define the capabilities to be dropped from the container, which is set to drop all capabilities in this case to enhance security
