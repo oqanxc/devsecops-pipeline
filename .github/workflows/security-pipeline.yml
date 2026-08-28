@@ -278,3 +278,25 @@ jobs:
             cosign verify ghcr.io/${{ github.repository_owner }}/devsecops-demo-app:latest \
               --certificate-identity-regexp "https://github.com/${{ github.repository_owner }}/devsecops-pipeline" \
               --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
+
+    
+  notify_on_failure:
+      name: Notify on Pipeline Failure
+      runs-on: ubuntu-latest
+      needs: [sast_scan, sast_codeql, secret_scan, sca_scan, dast_scan, sign_image]
+      if: failure()
+      steps:
+        - name: Send Failure Email
+          uses: dawidd6/action-send-mail@v3
+          with:
+            server_address: smtp.gmail.com
+            server_port: 465
+            username: ${{ secrets.MAIL_USERNAME }}
+            password: ${{ secrets.MAIL_PASSWORD }}
+            subject: "🚨 DevSecOps Pipeline Failed - ${{ github.repository }}"
+            to: okanuzun42@gmail.com
+            from: DevSecOps Pipeline Bot
+            body: |
+              Pipeline failed on branch: ${{ github.ref_name }}
+              Commit: ${{ github.sha }}
+              Check the logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
