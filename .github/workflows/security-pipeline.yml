@@ -195,16 +195,17 @@ jobs:
           docker build --no-cache -t devsecops-demo-app:latest .
           docker run -d --name test-flask-app -p 5000:5000 devsecops-demo-app:latest
           sleep 5
-
+   # Check if both apps are running   
       - name: Install & Run Node.js App
         run: |
           npm install express
           node app.js &
-          sleep 5
-          # Check if both apps are running
+          sleep 5 
+          
           curl -I "http://localhost:5000/greet?name=test"
           curl -I "http://localhost:3000/os-cmd/ping?host=127.0.0.1"
 
+      
       - name: Prepare ZAP Output Dir
         run: |
           mkdir -p zap_out
@@ -300,7 +301,7 @@ jobs:
             server_port: 465
             username: ${{ secrets.MAIL_USERNAME }}
             password: ${{ secrets.MAIL_PASSWORD }}
-            subject: "🚨 DevSecOps Pipeline Failed - ${{ github.repository }}"
+            subject: "Failed - ${{ github.repository }}"
             to: okanuzun42@gmail.com
             from: DevSecOps Pipeline Bot
             body: |
