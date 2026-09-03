@@ -7,7 +7,7 @@ Every gate below was added incrementally, tested in isolation, and debugged agai
 ## Architecture
 
 
-![DevSecOps Pipeline Graph](.github/assets/pipeline-graph.png)
+![DevSecOps Pipeline Graph](pipeline-graph.png)
 
 Parallel static gates (SAST, Secrets, SCA, IaC) → DAST fuzzing → Keyless Cosign signing → Auto Staging → Manual Approval for Production.
 
