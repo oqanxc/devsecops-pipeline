@@ -36,12 +36,11 @@ Findings:
 def call_gemini(prompt):
     try:
         response = requests.post(
-            "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent",
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent",
             headers={"x-goog-api-key": GEMINI_API_KEY},
             json={"contents": [{"parts": [{"text": prompt}]}]},
             timeout=(5, 30)
         )
-
         
         if not response.ok:
             print(f"Gemini API error {response.status_code}: {response.text}")
@@ -51,6 +50,9 @@ def call_gemini(prompt):
         
     except requests.exceptions.Timeout:
         print("Gemini API call timed out.")
+        raise
+    except requests.exceptions.RequestException as e:
+        print(f"Gemini API request failed: {e}")
         raise
 
 def main():
