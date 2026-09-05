@@ -1,6 +1,8 @@
 import os
 import json
 import requests
+from google import genai
+
 
 GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
 
@@ -35,25 +37,17 @@ Findings:
 
 def call_gemini(prompt):
     try:
-        response = requests.post(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent",
-            headers={"x-goog-api-key": GEMINI_API_KEY},
-            json={"contents": [{"parts": [{"text": prompt}]}]},
-            timeout=(5, 30)
+        client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
         )
         
-        if not response.ok:
-            print(f"Gemini API error {response.status_code}: {response.text}")
-            
-        response.raise_for_status()
-        return response.json()["candidates"][0]["content"]["parts"][0]["text"]
         
-    except requests.exceptions.Timeout:
-        print("Gemini API call timed out.")
-        raise
-    except requests.exceptions.RequestException as e:
-        print(f"Gemini API request failed: {e}")
-        raise
+        return response.text
+    except Exception as e:
+        print(f"Error calling Gemini API: {e}")
+        return "Error generating summary."
 
 def main():
     findings = read_findings()
