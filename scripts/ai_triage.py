@@ -34,18 +34,30 @@ Findings:
 """
 
 def call_gemini(prompt):
-    response = requests.post(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
-        headers={"x-goog-api-key": GEMINI_API_KEY},
-        json={"contents": [{"parts": [{"text": prompt}]}]}
-    )
-    response.raise_for_status()
-    return response.json()["candidates"][0]["content"]["parts"][0]["text"]
+    try:
+        response = requests.post(
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent",
+            headers={"x-goog-api-key": GEMINI_API_KEY},
+            json={"contents": [{"parts": [{"text": prompt}]}]},
+            timeout=(5, 30)
+        )
+        
+        if not response.ok:
+            print(f"Gemini API error {response.status_code}: {response.text}")
+            
+        response.raise_for_status()
+        return response.json()["candidates"][0]["content"]["parts"][0]["text"]
+        
+    except requests.exceptions.Timeout:
+        print("Gemini API call timed out.")
+        raise
 
 def main():
     findings = read_findings()
     if not findings:
         print("No findings to triage.")
+        with open("ai_triage_summary.md", "w", encoding="utf-8") as f:
+            f.write("### AI Security Triage\n\nNo security findings detected in this run. All gates are clear.")
         return
     prompt = build_prompt(findings)
     summary = call_gemini(prompt)
