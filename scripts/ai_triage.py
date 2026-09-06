@@ -1,6 +1,5 @@
 import os
 import json
-import requests
 from google import genai
 
 
