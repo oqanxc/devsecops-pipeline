@@ -14,3 +14,9 @@ CVE-2025-47273
 # low real-world risk for this containerized app (no untrusted sdist builds).
 # Fixed in setuptools 83.0.0; already running 84.0.0+ per runtime verification.
 CVE-2026-59890
+
+CVE-2026-86145
+TEMP-0000000-21C4F8
+TEMP-0000000-8188AC
+TEMP-0000000-A5518C
+TEMP-0000000-B05303
