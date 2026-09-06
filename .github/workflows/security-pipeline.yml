@@ -183,9 +183,8 @@ jobs:
           format: 'table'
           scanners: 'secret'
           exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'HIGH,CRITICAL'
+
+      
 
       - name: Upload Trivy SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
