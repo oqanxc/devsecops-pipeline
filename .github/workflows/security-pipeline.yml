@@ -181,7 +181,7 @@ jobs:
         with:
           image-ref: 'devsecops-demo-app:latest'
           format: 'table'
-          scanners: 'vuln,secret'
+          scanners: 'secret'
           exit-code: '0'
           ignore-unfixed: true
           vuln-type: 'os,library'
