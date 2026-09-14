@@ -105,7 +105,8 @@ jobs:
         with:
           scan-type: 'config'
           scan-ref: 'k8s/'
-          format: 'table'
+          format: 'sarif'
+          output: 'trivy-k8s-results.sarif'
           exit-code: '1'
           severity: 'HIGH,CRITICAL'
 
