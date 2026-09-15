@@ -118,7 +118,7 @@ jobs:
           scan-ref: 'k8s/'
           format: 'table'
           exit-code: '0'
-          severity: 'HIGH,CRITICAL'
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
 
       - name: Upload K8s SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
