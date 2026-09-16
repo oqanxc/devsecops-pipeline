@@ -109,6 +109,9 @@ jobs:
           output: 'trivy-k8s-results.sarif'
           exit-code: '1'
           severity: 'HIGH,CRITICAL'
+        env:
+          TRIVY_NO_CACHE: 'true'
+          TRIVY_SEVERITY: 'HIGH,CRITICAL'
 
       - name : Debug - Trivy K8s Human Readable Output
         if: always()
