@@ -95,6 +95,7 @@ Trivy required an explicit `exit-code: '1'` to actually block a pipeline on find
 -  Email notification on pipeline failure
 -  Pre-commit hook for local secret scanning (Docker-based Trufflehog)
 -  Dependabot for automated dependency updates
+- Real cloud-hosted staging/production clusters to replace the current simulated deploy steps
 
 **Planned**
 - Re-architect the demo application into a fintech-style microservice setup (auth service with JWT, payment/transfer endpoint, balance query service, API gateway) to demonstrate security patterns relevant to regulated financial systems (IDOR, token handling, PCI-DSS-adjacent controls)
