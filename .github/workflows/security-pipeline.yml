@@ -130,6 +130,13 @@ jobs:
         with:
           sarif_file: 'trivy-k8s-results.sarif'
           category: 'trivy-k8s'
+      
+      - name: Upload K8s SARIF Artifact
+        uses: actions/upload-artifact@v4
+        if: always() && hashFiles('trivy-k8s-results.sarif') != ''
+        with:
+          name: trivy-k8s-sarif
+          path: trivy-k8s-results.sarif
 
 
   sca_scan:
