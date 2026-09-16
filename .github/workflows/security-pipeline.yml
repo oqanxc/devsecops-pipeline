@@ -105,9 +105,24 @@ jobs:
         with:
           scan-type: 'config'
           scan-ref: 'k8s/'
-          format: 'table'
+          format: 'sarif'
+          output: 'trivy-k8s-results.sarif'
           exit-code: '1'
           severity: 'HIGH,CRITICAL'
+          trivyignores: '.trivyignore'
+        env:
+          TRIVY_NO_CACHE: 'true'
+          TRIVY_SEVERITY: 'HIGH,CRITICAL'
+
+      - name : Debug - Trivy K8s Human Readable Output
+        if: always()
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: 'k8s/'
+          format: 'table'
+          exit-code: '0'
+          severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
 
       - name: Upload K8s SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v4
@@ -115,6 +130,13 @@ jobs:
         with:
           sarif_file: 'trivy-k8s-results.sarif'
           category: 'trivy-k8s'
+      
+      - name: Upload K8s SARIF Artifact
+        uses: actions/upload-artifact@v4
+        if: always() && hashFiles('trivy-k8s-results.sarif') != ''
+        with:
+          name: trivy-k8s-sarif
+          path: trivy-k8s-results.sarif
 
 
   sca_scan:
