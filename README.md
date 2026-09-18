@@ -79,10 +79,6 @@ After pinning `setuptools` and `msgpack` to patched versions in the Dockerfile, 
 
 **Takeaway:** a scanner finding is a starting point for investigation, not an instruction to patch on sight. Suppressing a finding is only correct once it's proven to be a false positive, with evidence — not assumed.
 
-## Case study 3 — SAST tools don't need to be told to fail
-
-Trivy required an explicit `exit-code: '1'` to actually block a pipeline on findings (it defaults to reporting only). Bandit needed no such configuration — a SQL injection endpoint (raw string concatenation into a query) was enough to make Bandit exit non-zero and fail the job natively. Different tools have different default postures on "found something bad" — this has to be verified per tool rather than assumed.
-
 ## Roadmap
 
 **Done**
