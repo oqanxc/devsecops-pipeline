@@ -55,29 +55,6 @@ pre-commit install
 
 This runs Trufflehog (via Docker) on every `git commit`, blocking the commit if a verified secret is detected — catching leaks before they ever reach GitHub's commit history, where they'd persist even after being "removed" in a later commit.
 
-## Case study 1 — CRLF Injection exposed blind spots in both SAST and DAST
-
-An intentional CRLF Injection (unvalidated input passed to `redirect()`) was added to test whether the pipeline catches real vulnerabilities, not just runs without errors.
-
-- **Bandit** never flagged it — Flask's `redirect()` with unvalidated input isn't in its default rule set.
-- **ZAP Baseline Scan** missed it entirely — Baseline only passively scans pages discovered via spidering, and nothing links to the vulnerable route.
-- Switching to **`zap-full-scan.py`** with the target explicitly pointed at the vulnerable route enabled active fuzzing, which surfaced **Open/External Redirect**, **SSRF**, and a **Format String crash (500)** — all from the same unvalidated input, none of them the exact "CRLF Injection" label, but all real, related findings.
-
-**Takeaway:** a single unvalidated input can manifest as multiple vulnerability classes, and different tools catch different subsets — no single scanner is sufficient alone.
-
-## Case study 2 — Trivy false positives from vendored/leftover packages
-
-After pinning `setuptools` and `msgpack` to patched versions in the Dockerfile, Trivy kept reporting the *old*, vulnerable versions — even though a runtime check (`docker run ... python -c "import X; print(X.__version__)"`) confirmed the correct versions were actually installed and in use.
-
-**Root cause:** Trivy's filesystem scan also matches leftover/vendored copies the application never runs — `pip`'s own internal vendored copy of `msgpack`, and a base-image system-level `setuptools` copy. Neither is ever imported by the Flask app.
-
-**Resolution:**
-1. Verified the real, in-use versions at runtime (not just trusted the static scan)
-2. Located the duplicate copies with `find / -iname "*msgpack*"` inside the running container
-3. Documented and suppressed the confirmed false positives in `.trivyignore`, each with a comment explaining the root cause
-4. Discovered `msgpack` wasn't a real application dependency at all (`pip show flask` doesn't list it) — removed it from `requirements.txt` rather than just pinning a "safe" version of something unused
-
-**Takeaway:** a scanner finding is a starting point for investigation, not an instruction to patch on sight. Suppressing a finding is only correct once it's proven to be a false positive, with evidence — not assumed.
 
 ## Roadmap
 
@@ -93,7 +70,7 @@ After pinning `setuptools` and `msgpack` to patched versions in the Dockerfile, 
 -  Dependabot for automated dependency updates
 - Real cloud-hosted staging/production clusters to replace the current simulated deploy steps
 
-**Planned**
+**To DO**
 - Re-architect the demo application into a fintech-style microservice setup (auth service with JWT, payment/transfer endpoint, balance query service, API gateway) to demonstrate security patterns relevant to regulated financial systems (IDOR, token handling, PCI-DSS-adjacent controls)
 - AI-assisted triage — LLM-based summarization and prioritization of scan findings on each PR
 - Real cloud-hosted staging/production clusters to replace the current simulated deploy steps
