@@ -364,7 +364,8 @@ jobs:
     needs: [sast_scan, sca_scan]
     if: always()
     permissions:
-      contents: read 
+      contents: read
+      pull-requests: write 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7
